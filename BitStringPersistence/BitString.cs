@@ -5,7 +5,7 @@ namespace NorseTechnologies.NorseLibrary.Data
     public class BitString : IComparable<BitString>
     {
         public Guid Id { get; set; }
-        public List<BitStringSegment> Segments;
+        public List<BitStringSegment> Segments { get; set; } = new List<BitStringSegment>();
         private int SegmentCount;
         private int SegmentSize = sizeof(long) * 8;
 
@@ -16,14 +16,18 @@ namespace NorseTechnologies.NorseLibrary.Data
             public Guid Id { get; set; }
             public long BitMask { get; set; }
             public int MaskIndex { get; set; }
-            public BitString BitString { get; set; }
             public Guid BitStringId { get; set; }
-            public static BitStringSegment Create(long bitMask, int maskIndex)
+            public BitString BitString { get; set; }
+
+            public static BitStringSegment Create(BitString bitString, long bitMask, int maskIndex)
             {
                 return new BitStringSegment()
                 {
+                    Id = Guid.NewGuid(),
                     BitMask = bitMask,
-                    MaskIndex = maskIndex
+                    MaskIndex = maskIndex,
+                    BitString = bitString,
+                    BitStringId = bitString.Id
                 };
             }
         }
@@ -34,6 +38,7 @@ namespace NorseTechnologies.NorseLibrary.Data
 
         public BitString(int bitCount)
         {
+            Id = Guid.NewGuid();
             Initialize(bitCount);
         }
 
@@ -44,7 +49,7 @@ namespace NorseTechnologies.NorseLibrary.Data
             newBitString.Segments = new List<BitStringSegment>();
             for (int i = 0; i < newBitString.SegmentCount; i++)
             {
-                newBitString.Segments.Add(BitStringSegment.Create(0, i));
+                newBitString.Segments.Add(BitStringSegment.Create(newBitString, 0, i));
             }
             return newBitString;
         }
@@ -55,7 +60,7 @@ namespace NorseTechnologies.NorseLibrary.Data
             Segments = new List<BitStringSegment>();
             for (int i = 0; i < SegmentCount; i++)
             {
-                Segments.Add(BitStringSegment.Create(0, i));
+                Segments.Add(BitStringSegment.Create(this, 0, i));
             }
         }
 
@@ -65,7 +70,7 @@ namespace NorseTechnologies.NorseLibrary.Data
             List<BitStringSegment> newSegments = new List<BitStringSegment>();
             for (int i = 0; i < newSegmentCount; i++)
             {
-                newSegments.Add(BitStringSegment.Create(0, i));
+                newSegments.Add(BitStringSegment.Create(this, 0, i));
             }
             for (int i = 0; i < SegmentCount; i++)
             {

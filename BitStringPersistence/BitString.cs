@@ -5,7 +5,7 @@ namespace NorseTechnologies.NorseLibrary.Data
     public class BitString : IComparable<BitString>
     {
         public Guid Id { get; set; }
-        public List<BitStringSegment> Segments;
+        public List<BitStringSegment> Segments { get; set; } = new List<BitStringSegment>();
         private int SegmentCount;
         private int SegmentSize = sizeof(long) * 8;
 
@@ -26,7 +26,8 @@ namespace NorseTechnologies.NorseLibrary.Data
                     Id = Guid.NewGuid(),
                     BitMask = bitMask,
                     MaskIndex = maskIndex,
-                    BitString = bitString
+                    BitString = bitString,
+                    BitStringId = bitString.Id
                 };
             }
         }

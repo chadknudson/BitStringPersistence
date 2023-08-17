@@ -9,10 +9,14 @@ namespace BitStringPersistence.Database
         public virtual void Configure(EntityTypeBuilder<NorseTechnologies.NorseLibrary.Data.BitString.BitStringSegment> builder)
         {
             builder.ToTable("BitStringSegments");
-            builder.HasKey(e => e.Id);
-            builder.Property(e => e.BitMask)
+            builder.HasKey(s => s.Id);
+            builder.Property(s => s.BitMask)
                 .HasColumnName("BitMask")
                 .IsRequired();
+
+            builder.HasOne(s => s.BitString)
+                   .WithMany(bs => bs.Segments)
+                   .HasForeignKey(s => s.BitStringId);
         }
     }
 }

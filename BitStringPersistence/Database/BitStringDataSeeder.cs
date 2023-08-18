@@ -32,10 +32,6 @@ namespace BitStringPersistence.Database
             bitString1.Id = bitStringGuid1;
             bitString1.Segments[0].Id = segment1;
             bitString1.Segments[1].Id = segment2;
-            foreach(var segment in bitString1.Segments) 
-            {
-                segment.BitStringId = bitStringGuid1;
-            }
 
             BitString bitString2 = new BitString(64);
             bitString2.SetBit(0);
@@ -48,7 +44,6 @@ namespace BitStringPersistence.Database
             bitString2.SetBit(7);
             bitString2.Id = bitStringGuid2;
             bitString2.Segments[0].Id = segment3;
-            bitString2.Segments[0].BitStringId = bitStringGuid2;
 
             BitString bitString3 = new BitString(64);
             bitString3.SetBit(0);
@@ -61,7 +56,6 @@ namespace BitStringPersistence.Database
             bitString3.SetBit(7);
             bitString3.Id = bitStringGuid3;
             bitString3.Segments[0].Id = segment4;
-            bitString3.Segments[0].BitStringId = bitStringGuid3;
 
             context.Add(bitString1);
             context.Add(bitString2);

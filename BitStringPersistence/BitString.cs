@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 
 namespace NorseTechnologies.NorseLibrary.Data
 {
@@ -48,7 +46,7 @@ namespace NorseTechnologies.NorseLibrary.Data
             }
         }
 
-        public BitString() : this(64)
+        public BitString() 
         {
         }
 

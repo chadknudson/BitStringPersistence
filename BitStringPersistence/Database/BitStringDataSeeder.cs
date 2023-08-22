@@ -47,13 +47,13 @@ namespace BitStringPersistence.Database
 
             BitString bitString3 = new BitString(64);
             bitString3.SetBit(0);
-            bitString3.SetBit(1);
             bitString3.SetBit(2);
-            bitString3.SetBit(3);
             bitString3.SetBit(4);
-            bitString3.SetBit(5);
             bitString3.SetBit(6);
-            bitString3.SetBit(7);
+            bitString3.SetBit(8);
+            bitString3.SetBit(10);
+            bitString3.SetBit(12);
+            bitString3.SetBit(14);
             bitString3.Id = bitStringGuid3;
             bitString3.Segments[0].Id = segment4;
 

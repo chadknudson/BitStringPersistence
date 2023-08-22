@@ -13,7 +13,9 @@ namespace BitStringPersistence.Database
             builder.Property(s => s.BitMask)
                 .HasColumnName("BitMask")
                 .IsRequired();
-
+            builder.Property(s => s.MaskIndex)
+                .HasColumnName("MaskIndex")
+                .IsRequired();
             builder.HasOne(s => s.BitString)
                    .WithMany(bs => bs.Segments)
                    .HasForeignKey(s => s.BitStringId);

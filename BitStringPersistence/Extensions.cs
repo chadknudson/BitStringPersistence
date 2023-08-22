@@ -8,6 +8,7 @@ namespace BitStringPersistence
         {
             Console.WriteLine($"BitString: Id={bitString.Id}");
             Console.WriteLine("BitString Value:" + bitString.ToString());
+            Console.WriteLine("Number of Segments:" + bitString.Segments.Count.ToString());
             int iSegment = 0;
             foreach (var segment in bitString.Segments)
             {

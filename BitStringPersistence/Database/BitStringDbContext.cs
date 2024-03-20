@@ -10,7 +10,7 @@ namespace BitStringPersistence.Database
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(@"Server=CHADSDEVLAPTOP\MSSQLSERVER01;Database=BitStringDB;Trusted_Connection=True;TrustServerCertificate=True;");
+            optionsBuilder.UseSqlServer(@"Server=CHAD-DEV;Database=BitStringDB;Trusted_Connection=True;TrustServerCertificate=True;");
         }
     }
 }

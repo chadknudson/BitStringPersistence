@@ -80,6 +80,14 @@ using (var context = new BitStringDbContext())
 
     Console.WriteLine("\nBitString created in program.cs:\n");
     bitString.DebugDump();
+
+    // Persist the BitString to the database
+    Console.WriteLine("\nBitString modified with BitwiseOrAssignment (effectively bitString2 |= bitString3) persisted to database:\n");
+	retrievedBitString2.BitwiseOrAssignment(retrievedBitString3);
+	context.BitStrings.Update(retrievedBitString2);
+	context.SaveChanges();
+	retrievedBitString2.DebugDump();
+
 }
 
 Console.WriteLine("Press any key to exit.");

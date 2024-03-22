@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NorseTechnologies.NorseLibrary.Data;
-using static NorseTechnologies.NorseLibrary.Data.BitString;
 
 namespace BitStringPersistence.Database
 {

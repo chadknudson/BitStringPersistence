@@ -31,6 +31,16 @@ namespace NorseTechnologies.NorseLibrary.Data
 
 		public class BitStringSegment
 		{
+			public BitStringSegment()
+			{ 
+			}
+
+			public BitStringSegment(BitString bitstring)
+			{
+				BitString = bitstring;
+				BitStringId = bitstring.Id;
+			}
+
 			public Guid Id { get; set; }
 			public long BitMask { get; set; }
 			public int MaskIndex { get; set; }
@@ -39,7 +49,7 @@ namespace NorseTechnologies.NorseLibrary.Data
 
 			public static BitStringSegment Create(BitString bitString, long bitMask, int maskIndex)
 			{
-				return new BitStringSegment()
+				return new BitStringSegment(bitString)
 				{
 					Id = Guid.NewGuid(),
 					BitMask = bitMask,
@@ -50,7 +60,7 @@ namespace NorseTechnologies.NorseLibrary.Data
 			}
 		}
 
-		public BitString()
+		public BitString() : this(64)
 		{
 		}
 
@@ -63,39 +73,25 @@ namespace NorseTechnologies.NorseLibrary.Data
 		public static BitString Create(int bitCount)
 		{
 			BitString newBitString = new BitString(bitCount);
-			int newSegmentCount = (bitCount + (newBitString.SegmentSize - 1)) / newBitString.SegmentSize;
-			newBitString.Segments = new List<BitStringSegment>();
-			for (int i = 0; i < newSegmentCount; i++)
-			{
-				newBitString.Segments.Add(BitStringSegment.Create(newBitString, 0, i));
-			}
+			newBitString.Initialize(bitCount);
 			return newBitString;
 		}
 
-		public void Initialize(int bitCount)
+		public BitString Initialize(int bitCount)
 		{
-			int newSegmentCount = (bitCount + (SegmentSize - 1)) / SegmentSize;
 			Segments = new List<BitStringSegment>();
-			for (int i = 0; i < newSegmentCount; i++)
-			{
-				Segments.Add(BitStringSegment.Create(this, 0, i));
-			}
+			this.Grow(bitCount);
+			return this;
 		}
 
 		private BitString Grow(int bitCount)
 		{
 			int existingSegmentCount = Segments.Count;
 			int newSegmentCount = (bitCount + (SegmentSize - 1)) / SegmentSize;
-			List<BitStringSegment> newSegments = new List<BitStringSegment>();
 			for (int i = 0; i < newSegmentCount; i++)
 			{
-				newSegments.Add(BitStringSegment.Create(this, 0, i));
+				Segments.Add(BitStringSegment.Create(this, 0, i));
 			}
-			for (int i = 0; i < existingSegmentCount; i++)
-			{
-				newSegments[i] = Segments[i];
-			}
-			Segments = newSegments;
 			return this;
 		}
 
@@ -108,8 +104,7 @@ namespace NorseTechnologies.NorseLibrary.Data
 
 			if ((maskIndex + 1) > Segments.Count)
 			{
-				BitString grow = Grow((maskIndex + 1) * SegmentSize);
-				return grow.SetBit(bitIndex);
+				return Grow((maskIndex + 1) * SegmentSize).SetBit(bitIndex);
 			}
 
 			int bitShift = bitIndex % SegmentSize;
@@ -127,8 +122,7 @@ namespace NorseTechnologies.NorseLibrary.Data
 
 			if ((maskIndex + 1) > Segments.Count)
 			{
-				BitString grow = Grow((maskIndex + 1) * SegmentSize);
-				return grow.ClearBit(bitIndex);
+				return Grow((maskIndex + 1) * SegmentSize).ClearBit(bitIndex);
 			}
 
 			int bitShift = bitIndex % SegmentSize;
@@ -146,8 +140,7 @@ namespace NorseTechnologies.NorseLibrary.Data
 
 			if ((maskIndex + 1) > Segments.Count)
 			{
-				BitString grow = Grow((maskIndex + 1) * SegmentSize);
-				return grow.IsBitSet(bitIndex);
+				return Grow((maskIndex + 1) * SegmentSize).IsBitSet(bitIndex);
 			}
 
 			int bitShift = bitIndex % SegmentSize;
@@ -188,6 +181,24 @@ namespace NorseTechnologies.NorseLibrary.Data
 				}
 			}
 			return parsedBitString;
+		}
+
+		/// <summary>
+		/// Assign the value of another BitString to this BitString.
+		/// </summary>
+		/// <param name="value"></param>
+		/// <returns>this now contains the same values as the value BitString passed in but maintains its original Id and the Ids of the child BitStringSegments.</returns>
+		public BitString Assign(BitString value)
+		{
+			if (value.Segments.Count > this.Segments.Count)
+			{
+				Grow(value.Segments.Count * SegmentSize);
+			}
+			for (int i = 0; i < value.Segments.Count; i++)
+			{
+				Segments[i].BitMask = value.Segments[i].BitMask;
+			}
+			return this;
 		}
 
 		public int CompareTo(BitString other)
@@ -350,6 +361,62 @@ namespace NorseTechnologies.NorseLibrary.Data
 				results.Segments[i].BitMask = value1.Segments[i].BitMask | value2.Segments[i].BitMask;
 			}
 			return results;
+		}
+
+		/// <summary>
+		/// The BitwiseAndAssignment method performs the equivalent of the &= operator but changes the
+		/// values only of the left hand operand and does not return a new BitString object. This ensures
+		/// that the Id values of the BitString and its child BitStringSegment objects do not change.        /// 
+		/// </summary>
+		/// <param name="value1"></param>
+		/// <param name="value2"></param>
+		/// <returns>value1 is changed to reflect the result of the bitwise AND with value2.</returns>
+		/// <devnote>
+		/// C# does not allow the developer to overload the &= operator explicitly. C# does an implicit
+		/// overload of the &= operator by assigning the result of the & operation to the left hand 
+		/// operand. In our case, this does not work because we have Identity issues where we want to 
+		/// maintain the same Id values for the BitString and its child BitStringSegments for persisting
+		/// to a database.
+		/// </devnote>
+		public BitString BitwiseAndAssignment(BitString value)
+		{
+			int operatorUnits = Math.Min(this.Segments.Count, value.Segments.Count);
+			int resultUnits = Math.Max(this.Segments.Count, value.Segments.Count);
+			BitString results = BitString.Create(resultUnits * this.SegmentSize);
+
+			for (int i = 0; i < operatorUnits; i++)
+			{
+				results.Segments[i].BitMask = this.Segments[i].BitMask & value.Segments[i].BitMask;
+			}
+			return this.Assign(results);
+		}
+
+		/// <summary>
+		/// The BitwiseOrAssignment method performs the equivalent of the |= operator but changes the
+		/// values only of the left hand operand and does not return a new BitString object. This ensures
+		/// that the Id values of the BitString and its child BitStringSegment objects do not change.         
+		/// </summary>
+		/// <param name="value1"></param>
+		/// <param name="value2"></param>
+		/// <returns>value1 is changed to reflect the result of the bitwise OR with value2.</returns>
+		/// <devnote>
+		/// C# does not allow the developer to overload the |= operator explicitly. C# does an implicit
+		/// overload of the &= operator by assigning the result of the | operation to the left hand 
+		/// operand. In our case, this does not work because we have Identity issues where we want to 
+		/// maintain the same Id values for the BitString and its child BitStringSegments for persisting
+		/// to a database.
+		/// </devnote>
+		public BitString BitwiseOrAssignment(BitString value)
+		{
+			int operatorUnits = Math.Min(this.Segments.Count, value.Segments.Count);
+			int resultUnits = Math.Max(this.Segments.Count, value.Segments.Count);
+			BitString results = BitString.Create(resultUnits * this.SegmentSize);
+
+			for (int i = 0; i < operatorUnits; i++)
+			{
+				results.Segments[i].BitMask = this.Segments[i].BitMask | value.Segments[i].BitMask;
+			}
+			return this.Assign(results);
 		}
 
 		public static BitString operator ^(BitString value1, BitString value2)

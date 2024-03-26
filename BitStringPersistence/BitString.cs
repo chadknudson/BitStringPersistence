@@ -60,7 +60,7 @@ namespace NorseTechnologies.NorseLibrary.Data
 			}
 		}
 
-		public BitString() : this(64)
+		public BitString()
 		{
 		}
 
@@ -88,7 +88,7 @@ namespace NorseTechnologies.NorseLibrary.Data
 		{
 			int existingSegmentCount = Segments.Count;
 			int newSegmentCount = (bitCount + (SegmentSize - 1)) / SegmentSize;
-			for (int i = 0; i < newSegmentCount; i++)
+			for (int i = existingSegmentCount; i < newSegmentCount; i++)
 			{
 				Segments.Add(BitStringSegment.Create(this, 0, i));
 			}

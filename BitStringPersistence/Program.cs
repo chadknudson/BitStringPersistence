@@ -88,6 +88,11 @@ using (var context = new BitStringDbContext())
 	context.SaveChanges();
 	retrievedBitString2.DebugDump();
 
+    // Load a BitString value from the database
+    BitString retrievedValue = context.BitStrings.Where(x => x.Id == bitStringGuid1).Include(x => x.Segments).Single();
+    Console.WriteLine("\nBitString retrieved from database:\n");
+	retrievedValue.DebugDump();
+
 }
 
 Console.WriteLine("Press any key to exit.");
